@@ -12,10 +12,11 @@
 #############################
 ##### IMPORT STATEMENTS #####
 #############################
-from flask import Flask, request, render_template, url_for
+
+from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, RadioField, ValidationError
-from wtforms.validators import Required
+from wtforms import StringField, IntegerField, SubmitField, RadioField, ValidationError
+from wtforms.validators import Required, Email
 import requests
 import json
 
@@ -64,6 +65,26 @@ def specific(artist_name):
 		return render_template('specific_artist.html', results = result)
 
 	
+#create class to represent WTForm that inherits flask form
+class AlbumEntryForm(FlaskForm):
+	label = StringField('Enter the name of an album: ', validators=[Required()])
+	options = RadioField('How much do you like this album? (1 is low, 3 is high) ', choices=[('1','1'),('2','2'),('3','3')], validators=[Required()])
+	submit = SubmitField('Submit')
+
+@app.route('/album_entry')
+def album_entry():
+	album_entry_form = AlbumEntryForm()
+	return render_template('album_entry.html', form = album_entry_form)
+
+@app.route('/album_result', methods = ['GET', 'POST'])
+def album_result():
+	if request.method == 'POST':
+		album_dict = {}
+		album_title = request.form['name']
+		ranking = request.form['options']
+		album['title'] = title
+		album['score'] = score
+		return render_template('album_data.html', album = album )
 
 ####################
 ###### ROUTES ######
