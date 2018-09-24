@@ -34,7 +34,16 @@ app.config['SECRET_KEY'] = 'hardtoguessstring'
 @app.route('/artistform')
 def artistform():
 	return render_template('artistform.html')
+	
+class AlbumEntryForm(FlaskForm):
+	label = StringField('Enter the name of an album: ', validators=[Required()])
+	options = RadioField('How much do you like this album? (1 is low, 3 is high) ', choices=[('1','1'),('2','2'),('3','3')], validators=[Required()])
+	submit = SubmitField('Submit')
 
+
+####################
+###### ROUTES ######
+####################
 @app.route('/artistinfo')
 def artistinfo():
 	if request.method == 'GET':
@@ -50,7 +59,7 @@ def artistinfo():
 
 @app.route('/artistlinks')
 def artistlinks():
-	return render_template(artist_links.html)
+	return render_template('artist_links.html')
 
 @app.route('/specific/song/<artist_name>')
 def specific(artist_name):
@@ -64,12 +73,6 @@ def specific(artist_name):
 		result = json.loads(resp.text)['results']
 		return render_template('specific_artist.html', results = result)
 
-	
-#create class to represent WTForm that inherits flask form
-class AlbumEntryForm(FlaskForm):
-	label = StringField('Enter the name of an album: ', validators=[Required()])
-	options = RadioField('How much do you like this album? (1 is low, 3 is high) ', choices=[('1','1'),('2','2'),('3','3')], validators=[Required()])
-	submit = SubmitField('Submit')
 
 @app.route('/album_entry')
 def album_entry():
@@ -78,17 +81,12 @@ def album_entry():
 
 @app.route('/album_result', methods = ['GET', 'POST'])
 def album_result():
-	if request.method == 'POST':
-		album_dict = {}
-		album_title = request.form['name']
-		ranking = request.form['options']
-		album['title'] = title
-		album['score'] = score
-		return render_template('album_data.html', album = album )
+	album_entry_form = AlbumEntryForm()
+	if request.method == 'POST' and album_entry_form.validate_on_submit():
+		album_title = album_entry_form.label.data
+		ranking = album_entry_form.options.data
+		return render_template('album_data.html', album_title = album_title, ranking = ranking)
 
-####################
-###### ROUTES ######
-####################
 
 @app.route('/')
 def hello_world():
